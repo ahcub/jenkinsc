@@ -96,9 +96,9 @@ class Build:
         logger.info('Waiting till build completion')
         wait_start = datetime.now()
         while not self.ready():
-            seconds_since_start = (datetime.now() - wait_start).total_seconds()
+            seconds_since_start = int((datetime.now() - wait_start).total_seconds())
             logger.info('Waiting "%ssec" for "%s" build to finish', seconds_since_start,
-                                                                          self.data['fullDisplayName'])
+                        self.data['fullDisplayName'])
             sleep(15)
 
     @lost_connection_wrapper
