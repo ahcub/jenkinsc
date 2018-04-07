@@ -42,7 +42,9 @@ class JenkinsJob:
     @lost_connection_wrapper
     def trigger_build(self, build_params):
         url = '{}/job/{}/{}'.format(self.url, self.job_name, ('buildWithParameters' if build_params else 'build'))
-        response = requests.post(url, data=transform_jenkins_params(build_params), auth=self.auth)
+        data = transform_jenkins_params(build_params)
+        data.update(build_params)
+        response = requests.post(url, data=data, auth=self.auth)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
             raise JenkinsRequestError('failed to invoke jenkins job')
