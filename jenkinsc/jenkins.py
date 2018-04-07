@@ -40,23 +40,6 @@ class JenkinsJob:
         else:
             raise HTTPError('failed to invoke jenkins job')
 
-    def get_build_url(self, qi_url):
-        build_url = None
-        while build_url is None:
-            qi_info = requests.get('{}/api/json'.format(qi_url), auth=self.auth)
-            if qi_info.status_code not in [200, 201]:
-                raise HTTPError('Failed to get queue item information')
-            qi_data = qi_info.json()
-            if qi_data['blocked']:
-                logger.info('build is waiting in the queue')
-                sleep(10)
-                continue
-            else:
-                if not qi_data['cancelled']:
-                    return qi_data['executable']['url']
-                else:
-                    raise CanceledBuild('The build is canceled')
-
 
 class Build:
     def __init__(self, build_url, auth):
