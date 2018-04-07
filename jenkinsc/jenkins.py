@@ -89,19 +89,21 @@ class Build:
     def __init__(self, build_url, auth):
         self.build_url = build_url.rstrip('/')
         self.auth = auth
+        self.data = None
 
     def wait_till_completion(self):
         logger.info('Waiting till build completion')
         while True:
             if not self.ready():
-                logger.info('waiting for build to finish')
+                logger.info('Waiting for "%s" build to finish'.format(self.data['fullDisplayName']))
                 sleep(15)
 
     @lost_connection_wrapper
     def ready(self):
         response = requests.get('{}/api/json'.format(self.build_url), auth=self.auth)
         if response.status_code in [200, 201]:
-            return not response.json()['building']
+            self.data = response.json()
+            return not self.data['building']
         else:
             response.raise_for_status()
             raise JenkinsRequestError('Failed on getting build data')
