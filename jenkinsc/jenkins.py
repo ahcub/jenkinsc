@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import getLogger
 from time import sleep
 
@@ -93,9 +94,10 @@ class Build:
 
     def wait_till_completion(self):
         logger.info('Waiting till build completion')
+        wait_start = datetime.now()
         while True:
             if not self.ready():
-                logger.info('Waiting for "%s" build to finish'.format(self.data['fullDisplayName']))
+                logger.info('Waiting "%ssec" for "%s" build to finish'.format((datetime.now() - wait_start).total_seconds(), self.data['fullDisplayName']))
                 sleep(15)
 
     @lost_connection_wrapper
