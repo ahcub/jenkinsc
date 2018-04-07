@@ -44,6 +44,7 @@ class JenkinsJob:
         url = '{}/job/{}/{}'.format(self.url, self.job_name, ('buildWithParameters' if build_params else 'build'))
         data = transform_jenkins_params(build_params)
         data.update(build_params)
+        logger.info('Building job: %s with parameters: %s', url, data)
         response = requests.post(url, data=data, auth=self.auth)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
@@ -58,6 +59,7 @@ class QueueItem:
         self.build = None
 
     def get_build(self):
+        logger.info('Getting queue item build')
         while True:
             build = self.get_build_if_available()
             if build is None:
@@ -89,6 +91,7 @@ class Build:
         self.auth = auth
 
     def wait_till_completion(self):
+        logger.info('Waiting till build completion')
         while True:
             if not self.ready():
                 logger.info('waiting for build to finish')
