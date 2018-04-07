@@ -29,7 +29,7 @@ class Jenkins:
 class JenkinsJob:
     def __init__(self, job_name, url, auth):
         self.job_name = job_name
-        self.url = url
+        self.url = url.rstrip('/')
         self.auth = auth
 
     def build(self, build_params=None, block=False):
@@ -54,7 +54,7 @@ class JenkinsJob:
 
 class QueueItem:
     def __init__(self, queue_item_url, auth):
-        self.queue_item_url = queue_item_url
+        self.queue_item_url = queue_item_url.rstrip('/')
         self.auth = auth
         self.build = None
 
@@ -87,7 +87,7 @@ class QueueItem:
 
 class Build:
     def __init__(self, build_url, auth):
-        self.build_url = build_url
+        self.build_url = build_url.rstrip('/')
         self.auth = auth
 
     def wait_till_completion(self):
