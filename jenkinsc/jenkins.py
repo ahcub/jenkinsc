@@ -45,7 +45,7 @@ class JenkinsJob:
         url = '{}/job/{}/{}'.format(self.url, self.job_name, ('buildWithParameters' if build_params else 'build'))
         data = transform_jenkins_params(build_params)
         data.update(build_params)
-        logger.info('Building job: %s with parameters: %s', url, data)
+        logger.info('Building job: %s with parameters: %s', url, build_params)
         response = requests.post(url, data=data, auth=self.auth)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
