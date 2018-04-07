@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from logging import getLogger
 from time import sleep
@@ -29,8 +30,7 @@ class Jenkins:
 
 class JenkinsJob:
     def __init__(self, job_name, url, auth):
-        self.job_name = job_name
-        self.url = url.rstrip('/')
+        self.url = '{}/job/{}'.format(url.rstrip('/'), job_name)
         self.auth = auth
 
     def build(self, build_params=None, block=False):
@@ -42,7 +42,7 @@ class JenkinsJob:
 
     @lost_connection_wrapper
     def trigger_build(self, build_params):
-        url = '{}/job/{}/{}'.format(self.url, self.job_name, ('buildWithParameters' if build_params else 'build'))
+        url = '{}/{}'.format(self.url, ('buildWithParameters' if build_params else 'build'))
         data = transform_jenkins_params(build_params)
         data.update(build_params)
         logger.info('Building job: %s with parameters: %s', url, build_params)
@@ -51,6 +51,11 @@ class JenkinsJob:
             response.raise_for_status()
             raise JenkinsRequestError('failed to invoke jenkins job')
         return response
+
+    def get_build(self, build_number):
+        build = Build('{}/{}'.format(self.url, build_number), self.auth)
+        build.pull_build_data()
+        return build
 
 
 class QueueItem:
@@ -64,7 +69,7 @@ class QueueItem:
         while True:
             build = self.get_build_if_available()
             if build is None:
-                logger.info('build is waiting in the queue')
+                logger.info('Waiting in the queue to start the build')
                 sleep(10)
             else:
                 return build
@@ -87,8 +92,8 @@ class QueueItem:
 
 
 class Build:
-    def __init__(self, build_url, auth):
-        self.build_url = build_url.rstrip('/')
+    def __init__(self, url, auth):
+        self.url = url.rstrip('/')
         self.auth = auth
         self.data = None
 
@@ -97,26 +102,32 @@ class Build:
         wait_start = datetime.now()
         while not self.ready():
             seconds_since_start = int((datetime.now() - wait_start).total_seconds())
-            logger.info('Waiting "%ssec" for "%s" build to finish', seconds_since_start,
+            logger.info('Waited "%ssec" for "%s" build to finish', seconds_since_start,
                         self.data['fullDisplayName'])
             sleep(15)
 
-    @lost_connection_wrapper
     def ready(self):
-        response = requests.get('{}/api/json'.format(self.build_url), auth=self.auth)
+        self.pull_build_data()
+        return not self.data['building']
+
+    @lost_connection_wrapper
+    def pull_build_data(self):
+        response = requests.get('{}/api/json'.format(self.url), auth=self.auth)
         if response.status_code in [200, 201]:
             self.data = response.json()
-            return not self.data['building']
         else:
             response.raise_for_status()
             raise JenkinsRequestError('Failed on getting build data')
 
-    @lost_connection_wrapper
     def successful(self):
-        response = requests.get('{}/api/json'.format(self.build_url), auth=self.auth)
-        if response.status_code in [200, 201]:
-            build_data = response.json()
-            return build_data['result'] == 'SUCCESS'
-        else:
+        self.pull_build_data()
+        return self.data['result'] == 'SUCCESS'
+
+    @lost_connection_wrapper
+    def update_build_name(self, new_build_name):
+        response = requests.post('{}/configSubmit'.format(self.url),
+                                 data={'json': json.dumps({'displayName': new_build_name})},
+                                 auth=self.auth)
+        if response.status_code not in [200, 201]:
             response.raise_for_status()
             raise JenkinsRequestError('Failed on getting build data')
