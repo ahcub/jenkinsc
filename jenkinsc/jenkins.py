@@ -33,10 +33,10 @@ class JenkinsJob:
 
         result = requests.post(url, data=transform_jenkins_params(build_params), auth=self.auth)
         if result.status_code in [200, 201]:
+            qi = QueueItem(result.headers['Location'], self.auth)
             if block:
-                build = Build(self.get_build_url(result.headers['Location']), self.auth)
-                build.wait_till_completion()
-                return build
+                qi.get_build().wait_till_completion()
+            return qi
         else:
             raise HTTPError('failed to invoke jenkins job')
 
@@ -82,6 +82,32 @@ class Build:
             return build_data['result'] == 'SUCCESS'
         else:
             raise HTTPError('Failed on getting build data')
+
+
+class QueueItem:
+    def __init__(self, queue_item_url, auth):
+        self.queue_item_url = queue_item_url
+        self.auth = auth
+        self.build = None
+
+    def get_build(self):
+        if self.build is not None:
+            return self.build
+        while True:
+            qi_info = requests.get('{}/api/json'.format(self.queue_item_url), auth=self.auth)
+            if qi_info.status_code not in [200, 201]:
+                raise HTTPError('Failed to get queue item information')
+            qi_data = qi_info.json()
+            if qi_data['blocked']:
+                logger.info('build is waiting in the queue')
+                sleep(10)
+                continue
+            else:
+                if not qi_data['cancelled']:
+                    self.build = Build(qi_data['executable']['url'], self.auth)
+                    return self.build
+                else:
+                    raise CanceledBuild('The build is canceled')
 
 
 def transform_jenkins_params(params):
