@@ -95,10 +95,11 @@ class Build:
     def wait_till_completion(self):
         logger.info('Waiting till build completion')
         wait_start = datetime.now()
-        while True:
-            if not self.ready():
-                logger.info('Waiting "%ssec" for "%s" build to finish'.format((datetime.now() - wait_start).total_seconds(), self.data['fullDisplayName']))
-                sleep(15)
+        while not self.ready():
+            seconds_since_start = (datetime.now() - wait_start).total_seconds()
+            logger.info('Waiting "%ssec" for "%s" build to finish'.format(seconds_since_start,
+                                                                          self.data['fullDisplayName']))
+            sleep(15)
 
     @lost_connection_wrapper
     def ready(self):
