@@ -126,7 +126,7 @@ class Build:
     @lost_connection_wrapper
     def update_build_name(self, new_build_name):
         response = requests.post('{}/configSubmit'.format(self.url),
-                                 data={'json': json.dumps({'displayName': new_build_name})},
+                                 data={'json': json.dumps({'displayName': new_build_name, 'description': ''})},
                                  auth=self.auth)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
