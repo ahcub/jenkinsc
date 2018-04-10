@@ -28,8 +28,11 @@ def lost_connection_wrapper(func):
                 logger.info('connection dropped, retrying in 15 sec')
                 sleep(15)
             except HTTPError as err:
-                if n == 4 or err.response.status_code != 504:
+                if n == 4 or err.response.status_code not in [504, 401]:
                     raise
-                logger.exception('jenkins failed with gateway timeout')
+                if err.response.status_code == 504:
+                    logger.exception('Jenkins failed with gateway timeout')
+                if err.response.status_code == 401:
+                    logger.exception('Jenkins failed with auth error')
                 sleep(60)
     return wrapper

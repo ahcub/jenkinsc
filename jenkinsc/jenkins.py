@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from logging import getLogger
+from operator import itemgetter
 from time import sleep
 
 import requests
@@ -56,6 +57,20 @@ class JenkinsJob:
         build = Build('{}/{}'.format(self.url, build_number), self.auth)
         build.pull_build_data()
         return build
+
+    @lost_connection_wrapper
+    def find_last_successful_build_by_display_name(self, display_name_part):
+        url = '{}/api/json'.format(self.url)
+        response = requests.get(url, auth=self.auth)
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+            raise JenkinsRequestError('failed to find job builds')
+        for build_info in sorted(response.json()['builds'], key=itemgetter('number'), reverse=True):
+            logger.info('getting build info: %s', build_info['number'])
+            build = Build('{}/{}'.format(self.url, build_info['number']), self.auth)
+            build.pull_build_data()
+            if display_name_part in build.data['displayName'] and build.data['result'] == 'SUCCESS':
+                return build
 
 
 class QueueItem:
