@@ -146,3 +146,10 @@ class Build:
         if response.status_code not in [200, 201]:
             response.raise_for_status()
             raise JenkinsRequestError('Failed on getting build data')
+
+    def get_params(self):
+        if self.data is None:
+            self.pull_build_data()
+        for action in self.data['actions']:
+            if 'parameters' in action:
+                return {build_param['name']: build_param['value'] for build_param in action['parameters']}
