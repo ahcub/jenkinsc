@@ -99,11 +99,15 @@ class QueueItem:
             raise JenkinsRequestError('Failed to get queue item information')
         qi_data = response.json()
         if not qi_data['blocked']:
-            if not qi_data['cancelled']:
-                self.build = Build(qi_data['executable']['url'], self.auth)
-                return self.build
-            else:
-                raise CanceledBuild('The build is canceled')
+            try:
+                if not qi_data['cancelled']:
+                    self.build = Build(qi_data['executable']['url'], self.auth)
+                    return self.build
+                else:
+                    raise CanceledBuild('The build is canceled')
+            except Exception:
+                logger.info('qi_data: %s', qi_data)
+                raise
 
 
 class Build:
