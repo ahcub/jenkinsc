@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from functools import lru_cache
 from logging import getLogger
 from operator import itemgetter
 from time import sleep
@@ -7,7 +8,7 @@ from time import sleep
 import requests
 from requests.auth import HTTPBasicAuth
 
-from jenkinsc.utils import transform_jenkins_params, lost_connection_wrapper
+from jenkinsc.utils import transform_jenkins_params, lost_connection_wrapper, find_job_by_part_of_name
 
 logger = getLogger('jenkinsc')
 
@@ -25,8 +26,22 @@ class Jenkins:
         self.url = url
         self.auth = HTTPBasicAuth(username, password)
 
+    @lru_cache()
     def __getitem__(self, item):
-        return JenkinsJob(item, self.url, self.auth)
+        jobs = self.get_all_jobs()
+        name = find_job_by_part_of_name(item, jobs)
+        if name is not None:
+            return JenkinsJob(name, self.url, self.auth)
+        else:
+            raise Exception('Cannot find any job to match the pattern: {}'.format(item))
+
+    def get_all_jobs(self):
+        url = '{}/api/json'.format(self.url)
+        response = requests.post(url, auth=self.auth)
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+            raise JenkinsRequestError('failed to invoke jenkins job')
+        return sorted([job['name'] for job in response.json()['jobs']])
 
 
 class JenkinsJob:

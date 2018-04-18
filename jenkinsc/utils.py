@@ -36,3 +36,16 @@ def lost_connection_wrapper(func):
                     logger.exception('Jenkins failed with auth error')
                 sleep(60)
     return wrapper
+
+
+def find_job_by_part_of_name(name_part, jobs):
+    for job in jobs:
+        job_name_index = 0
+        for letter in name_part:
+            index = job.find(letter, job_name_index)
+            if index == -1:
+                break
+            else:
+                job_name_index = index + 1
+        else:
+            return job
