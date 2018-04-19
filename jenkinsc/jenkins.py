@@ -35,6 +35,7 @@ class Jenkins:
         else:
             raise Exception('Cannot find any job to match the pattern: {}'.format(item))
 
+    @lost_connection_wrapper
     def get_all_jobs(self):
         url = '{}/api/json'.format(self.url)
         response = requests.post(url, auth=self.auth)

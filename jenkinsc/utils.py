@@ -39,6 +39,7 @@ def lost_connection_wrapper(func):
 
 
 def find_job_by_part_of_name(name_part, jobs):
+    jobs_that_fit_the_pattern_vs_weights = []
     for job in jobs:
         job_name_index = 0
         for letter in name_part:
@@ -48,4 +49,5 @@ def find_job_by_part_of_name(name_part, jobs):
             else:
                 job_name_index = index + 1
         else:
-            return job
+            jobs_that_fit_the_pattern_vs_weights.append((len(job) - len(name_part), job))
+    return sorted(jobs_that_fit_the_pattern_vs_weights)[0][1]
