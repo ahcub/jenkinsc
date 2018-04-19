@@ -38,16 +38,30 @@ def lost_connection_wrapper(func):
     return wrapper
 
 
-def find_job_by_part_of_name(name_part, jobs):
-    jobs_that_fit_the_pattern_vs_weights = []
-    for job in jobs:
-        job_name_index = 0
-        for letter in name_part:
-            index = job.find(letter, job_name_index)
+def find_full_string_by_its_part(string_part, full_strings):
+    strings_that_fit_the_pattern_vs_weights = []
+    for full_string in full_strings:
+        full_string_index = 0
+        for letter in string_part:
+            index = find(full_string, letter, full_string_index)
             if index == -1:
                 break
             else:
-                job_name_index = index + 1
+                full_string_index = index + 1
         else:
-            jobs_that_fit_the_pattern_vs_weights.append((len(job) - len(name_part), job))
-    return sorted(jobs_that_fit_the_pattern_vs_weights)[0][1]
+            strings_that_fit_the_pattern_vs_weights.append((len(full_string) - len(string_part), full_string))
+    if strings_that_fit_the_pattern_vs_weights:
+        return sorted(strings_that_fit_the_pattern_vs_weights)[0][1]
+    else:
+        raise Exception('Cannot find the full name by pattern: %s', string_part)
+
+
+def find(full_string, letter, full_string_index):
+    original_case = full_string.find(letter, full_string_index)
+    inverted_case = full_string.find(letter.lower() if letter.isupper() else letter.upper(), full_string_index)
+    if original_case == -1:
+        return inverted_case
+    if inverted_case == -1:
+        return original_case
+
+    return min(original_case, inverted_case)
