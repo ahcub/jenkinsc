@@ -123,15 +123,10 @@ class QueueItem:
             else:
                 return build
 
-    @lost_connection_wrapper
     def get_build_if_available(self):
         if self.build is not None:
             return self.build
-        response = requests.get('{}/api/json'.format(self.queue_item_url), auth=self.auth)
-        if response.status_code not in [200, 201]:
-            response.raise_for_status()
-            raise JenkinsRequestError('Failed to get queue item information')
-        qi_data = response.json()
+        qi_data = self.get_qi_data()
         if not qi_data['blocked']:
             try:
                 if not qi_data['cancelled']:
@@ -140,9 +135,31 @@ class QueueItem:
                 else:
                     raise CanceledBuild('The build is canceled')
             except Exception:
+                logger.warning('error encountered on getting the build url, retrying.')
                 logger.info('qi_data_url: %s', '{}/api/json'.format(self.queue_item_url))
                 logger.info('qi_data: %s', qi_data)
+                for retry_attempt in range(5):
+                    sleep(60)
+                    qi_data = self.get_qi_data()
+                    try:
+                        if not qi_data['cancelled']:
+                            self.build = Build(qi_data['executable']['url'], self.auth)
+                            return self.build
+                        else:
+                            raise CanceledBuild('The build is canceled')
+                    except CanceledBuild:
+                        raise
+                    except Exception:
+                        pass
                 raise
+
+    @lost_connection_wrapper
+    def get_qi_data(self):
+        response = requests.get('{}/api/json'.format(self.queue_item_url), auth=self.auth)
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+            raise JenkinsRequestError('Failed to get queue item information')
+        return response.json()
 
 
 class Build:
