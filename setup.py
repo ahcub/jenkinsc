@@ -5,7 +5,7 @@ from setuptools import find_packages
 setup(
     name='jenkinsc',
     packages=find_packages(include=('jenkinsc', )),
-    version='0.0.20',
+    version='0.0.21',
     description='bulletproof jenkins client',
     author='Alex Buchkovsky',
     author_email='olex.buchkovsky@gmail.com',
