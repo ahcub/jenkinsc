@@ -61,10 +61,11 @@ class JenkinsJob:
     def trigger_build(self, build_params):
         url = '{}/{}'.format(self.url, ('buildWithParameters' if build_params else 'build'))
         job_param_names = self.get_params()
-        if isinstance(build_params, dict):
-            build_params = {find_full_string_by_its_part(name, job_param_names): value for name, value in build_params.items()}
-        else:
-            build_params = {name: value for name, value in zip(job_param_names, build_params)}
+        if build_params:
+            if isinstance(build_params, dict):
+                build_params = {find_full_string_by_its_part(name, job_param_names): value for name, value in build_params.items()}
+            else:
+                build_params = {name: value for name, value in zip(job_param_names, build_params)}
         data = transform_jenkins_params(build_params)
         data.update(build_params)
         logger.info('Building job: %s with parameters: %s', url, build_params)
