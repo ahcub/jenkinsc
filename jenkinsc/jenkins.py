@@ -67,8 +67,10 @@ class JenkinsJob:
                 build_params = {find_full_string_by_its_part(name, job_param_names): value for name, value in build_params.items()}
             else:
                 build_params = {name: value for name, value in zip(job_param_names, build_params)}
-        data = transform_jenkins_params(build_params)
-        data.update(build_params)
+            data = transform_jenkins_params(build_params)
+            data.update(build_params)
+        else:
+            data = None
         response = requests.post(url, data=data, auth=self.auth)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
