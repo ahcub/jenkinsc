@@ -97,17 +97,15 @@ class JenkinsJob:
 
     @lost_connection_wrapper
     def find_last_successful_build_by_display_name(self, display_name_part):
-        url = '{}/api/json?tree=allBuilds[number]'.format(self.url)
+        url = '{}/api/json?tree=allBuilds[number,displayName,result]'.format(self.url)
         response = requests.get(url, auth=self.auth)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
             raise JenkinsRequestError('failed to find job builds')
         for build_info in sorted(response.json()['allBuilds'], key=itemgetter('number'), reverse=True):
             logger.info('getting build info: %s', build_info['number'])
-            build = Build('{}/{}'.format(self.url, build_info['number']), self.auth)
-            build.pull_build_data()
-            if display_name_part in build.data['displayName'] and build.data['result'] == 'SUCCESS':
-                return build
+            if display_name_part in build_info.data['displayName'] and build_info.data['result'] == 'SUCCESS':
+                return Build('{}/{}'.format(self.url, build_info['number']), self.auth)
 
 
 class QueueItem:
