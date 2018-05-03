@@ -104,7 +104,7 @@ class JenkinsJob:
             raise JenkinsRequestError('failed to find job builds')
         for build_info in sorted(response.json()['allBuilds'], key=itemgetter('number'), reverse=True):
             logger.info('getting build info: %s', build_info['number'])
-            if display_name_part in build_info.data['displayName'] and build_info.data['result'] == 'SUCCESS':
+            if display_name_part in build_info['displayName'] and build_info['result'] == 'SUCCESS':
                 return Build('{}/{}'.format(self.url, build_info['number']), self.auth)
 
 
