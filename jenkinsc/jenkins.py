@@ -107,6 +107,14 @@ class JenkinsJob:
             if display_name_part in build_info['displayName'] and build_info['result'] == 'SUCCESS':
                 return Build('{}/{}'.format(self.url, build_info['number']), self.auth)
 
+    def get_all_builds(self):
+        url = '{}/api/json?tree=allBuilds[number,displayName,result]'.format(self.url)
+        response = requests.get(url, auth=self.auth)
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+            raise JenkinsRequestError('failed to find job builds')
+        return sorted(response.json()['allBuilds'], key=itemgetter('number'), reverse=True)
+
 
 class QueueItem:
     def __init__(self, queue_item_url, auth):
