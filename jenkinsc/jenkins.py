@@ -44,6 +44,17 @@ class Jenkins:
             raise JenkinsRequestError('failed to invoke jenkins job')
         return sorted([job['name'] for job in response.json()['jobs']])
 
+    def create_job_from_template(self, new_job_name, template_job_name, view_name):
+        url = '{}/view/{}/createItem'.format(self.url, view_name)
+        response = requests.post(url, data={"name": new_job_name, "mode": "copy",
+                                            "from": template_job_name, "_.addToCurrentView": 'on'},
+                                 auth=self.auth)
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+            raise JenkinsRequestError('failed to invoke jenkins job')
+
+        return 'SUCCESS'
+
 
 class JenkinsJob:
     def __init__(self, job_name, url, auth):
