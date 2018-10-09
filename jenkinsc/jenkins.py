@@ -149,11 +149,12 @@ class QueueItem:
         qi_data = self.get_qi_data()
         if not qi_data['blocked']:
             try:
-                if not qi_data['cancelled']:
-                    self.build = Build(qi_data['executable']['url'], self.auth)
-                    return self.build
-                else:
-                    raise CanceledBuild('The build is canceled')
+                if 'cancelled' in qi_data:
+                    if not qi_data['cancelled']:
+                        self.build = Build(qi_data['executable']['url'], self.auth)
+                        return self.build
+                    else:
+                        raise CanceledBuild('The build is canceled')
             except Exception:
                 logger.warning('error encountered on getting the build url, retrying.')
                 logger.info('qi_data_url: %s', '{}/api/json'.format(self.queue_item_url))
