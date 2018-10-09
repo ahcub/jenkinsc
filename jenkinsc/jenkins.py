@@ -155,6 +155,9 @@ class QueueItem:
                         return self.build
                     else:
                         raise CanceledBuild('The build is canceled')
+                else:
+                    logger.info('qi_data: %s', qi_data)
+                    return self.build
             except Exception:
                 logger.warning('error encountered on getting the build url, retrying.')
                 logger.info('qi_data_url: %s', '{}/api/json'.format(self.queue_item_url))
