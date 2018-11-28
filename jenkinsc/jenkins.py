@@ -233,3 +233,11 @@ class Build:
         for action in self.data['actions']:
             if 'parameters' in action:
                 return {build_param['name']: build_param['value'] for build_param in action['parameters']}
+
+    def get_console_output(self):
+        response = requests.post('{}/consoleText'.format(self.url), auth=self.auth)
+        if response.status_code in [200, 201]:
+            return response.content.decode()
+        else:
+            response.raise_for_status()
+            raise JenkinsRequestError('Failed on getting build data')
