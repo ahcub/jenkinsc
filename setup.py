@@ -9,7 +9,7 @@ with open('README.md') as file:
 setup(
     name='jenkinsc',
     packages=find_packages(include=('jenkinsc', )),
-    version='0.0.30',
+    version='0.0.31',
     description='bulletproof jenkins client',
     author='Alex Buchkovsky',
     long_description=long_description,
