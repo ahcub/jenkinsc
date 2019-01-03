@@ -61,6 +61,10 @@ class JenkinsJob:
         self.url = '{}/job/{}'.format(url.rstrip('/'), job_name)
         self.auth = auth
 
+    @lru_cache()
+    def __getitem__(self, item):
+        return self.get_build(item)
+
     def build(self, build_params=None, block=False):
         response = self.trigger_build(build_params)
         qi = QueueItem(response.headers['Location'], self.auth)
