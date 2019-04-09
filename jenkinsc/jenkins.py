@@ -65,8 +65,8 @@ class JenkinsJob:
     def __getitem__(self, item):
         return self.get_build(item)
 
-    def build(self, build_params=None, block=False):
-        response = self.trigger_build(build_params)
+    def build(self, build_params=None, files=None, block=False):
+        response = self.trigger_build(build_params, files=files)
         qi = QueueItem(response.headers['Location'], self.auth)
         if block:
             qi.get_build().wait_till_completion()
