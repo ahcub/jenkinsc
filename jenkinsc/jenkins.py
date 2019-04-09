@@ -73,7 +73,13 @@ class JenkinsJob:
         return qi
 
     @lost_connection_wrapper
-    def trigger_build(self, build_params):
+    def trigger_build(self, build_params, files=None):
+        """
+        Triggers jenkins job.
+        :param build_params: job parameters
+        :param files: file parameters if present. Example: {'FILE_PARAMETER_NAME': ('filename.txt', file_stream}}
+        :return: requests.Response
+        """
         url = '{}/{}'.format(self.url, ('buildWithParameters' if build_params else 'build'))
         logger.info('Building job: %s with parameters: %s', url, build_params)
         job_param_names = self.get_params()
@@ -86,7 +92,7 @@ class JenkinsJob:
             data.update(build_params)
         else:
             data = None
-        response = requests.post(url, data=data, auth=self.auth)
+        response = requests.post(url, data=data, auth=self.auth, files=files)
         if response.status_code not in [200, 201]:
             response.raise_for_status()
             raise JenkinsRequestError('failed to invoke jenkins job')
