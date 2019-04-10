@@ -1,0 +1,13 @@
+sudo: false
+language: python
+python: 3.7
+install:
+- pip install -r requirements.txt
+deploy:
+  provider: pypi
+  user: tarasmatsyk
+  password:
+    secure: bNcz9td+E9BRvysoAPFQT76F7Z4N2c4qRE6m2Z0Pbiy+nFs0q+pEx98Qn6dww9+x7XxYe6G2bHFApJjK9HsIfFyUIPFaZKlw50AEaG6D+vtm9dCCrnYgDFmfHrxWSoYSMp/9uPkcs1hVxf7XnuqY7gVqquPz1+01b+UOmZocTfIcj0gbj7r3xl5qMuiZvkYGArWJYCkgisLqpQbqhMtliBAA3cMyDQ82I119V/p8xg/hkwEI5jyTIIGPY8u56HFrJP4UTovhZ1BtYOXr5awIhGxrgk0EuaiO06K1iuocUt+sx/S60k5SJoMR9aj1PJpqPL+JgXTrtDZ1rl0Wo6g0arvIXfK64vK40B+79GXleDGtmirulhMFtP4nWhFuCgbrQWiDTN06TG/xdojwCoD8cJX2Z+uzyblDgDAGf9rcxpjcTHBu48sM1NLG5BD9RmOUpQE9VnWcFisdtRMF/0TENj+6HsWx1M/ELbeYtbJeEL+SK4PUfNlBCIiyMF7NqpQgt7cNZc3NUCKXjRGizllmfozYiLJh77c/kP9sheSzVg1ZLXOhYbt7w7IMrsZ0hvEBxTGggrIOvD97wpEiCMWolY5DtCb8ERCEuC0fYTMovhniHUEM0JyA3/DF4ELKe79E3t5RzI89LDS1SLpsjMF27kGZlBhckbrg6W/rHfIfOgs=
+  on:
+    tags: true
+    branch: master
