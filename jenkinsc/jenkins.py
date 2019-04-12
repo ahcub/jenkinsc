@@ -66,6 +66,9 @@ class JenkinsJob:
         return self.get_build(item)
 
     def build(self, build_params=None, files=None, block=False):
+        if files and not bool(build_params):
+            raise ValueError('build_params is missing. Please provide at least 1 default argument along with files.')
+
         response = self.trigger_build(build_params, files=files)
         qi = QueueItem(response.headers['Location'], self.auth)
         if block:
@@ -251,3 +254,19 @@ class Build:
         else:
             response.raise_for_status()
             raise JenkinsRequestError('Failed on getting build data')
+
+    def get_build_file_parameter_content(self, base_url, job_base_name, parameter_name, filename):
+        if 'number' not in self.data:
+            self.pull_build_data()
+
+        url = '{base_url}/view/Loaders/job/{name}/{number}/parameters/parameter/{parameter}/{filename}'.format(
+            base_url=base_url, name=job_base_name,
+            number=self.data['number'], parameter=parameter_name, filename=filename,
+        )
+        response = requests.get(url=url, auth=self.auth)
+        if response.status_code == 200:
+            return response.content.decode()
+        else:
+            response.raise_for_status()
+            raise JenkinsRequestError('Failed on getting file parameter content')
+
