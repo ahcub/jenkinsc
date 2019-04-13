@@ -1,0 +1,16 @@
+sudo: false
+language: python
+python: 3.6
+# python 3.7 is not available yet
+install:
+  - pip install -r requirements.txt
+script:
+  - pytest
+deploy:
+  provider: pypi
+  user: tarasmatsyk
+  password:
+    secure: O59ZV9WWRGl2fpB2xXHDkOhjCmnNYs17XFwWD1r87MQ2Ip+OLaJNCz7S8Wfob+8hJmJSaqcau5fkyynVY9eIgcJUB2uNi+n3knzJFh0ddxHWpHrSYdLE/tr3Zjl/THVRE9OeAUOGk32XmEjaPn8/kR4VMhLHverJu0iiP9sfj8GL7klF/jQ9ukDhz6FeVA0v+lXMpKz7cU6aN0afDUFMbWSb8DdcOiRV5qBLl5oTq4+aenB0ajQd4M61cXsOg8v8IwRHc/1xAyADIx0iB0JYNac7whZseYWdbtXfu6UXJuR18IYL5ahRBk9YC/Ij7QVwdW00NI2FmP6YRZfjAn5+5QEbBi0w6XyREMnkJ6FjfMo+Afbh2BPXNHUcalyltg0EJe2MnKWSI2/P20t6E8fRUkqNCsjOW13f3M17MPABij4ny7Ahq6EaE9l51LV7BfGraDEOZVUsd0JlQKkOKhGgtZyqVXedcUqMnIwcTAvaPNrfFAs3H8+UANdOA9RUuv5VimcLIpLQX5AXFrNwVORFkHgJB+ef6FTD0qpxZOPGBRiI9omhBftDVjvMM18wwV3sYN46Zme4VrX3mPRnf1kT/SaBhn7wa4Rj8JNKA0eG+lSCS+N679r55Wf/sG15kBPzQfbGN/KRyGdRdboiMu2j2pEuGNtDdtBV8iXDDxvGPZM=
+  on:
+    tags: true
+    branch: master
