@@ -112,6 +112,10 @@ class JenkinsJob:
             if 'parameterDefinitions' in action:
                 for param in action['parameterDefinitions']:
                     job_params.append(param['name'])
+        for action in response.json()['property']:
+            if 'parameterDefinitions' in action:
+                for param in action['parameterDefinitions']:
+                    job_params.append(param['name'])
         return job_params
 
     def get_build(self, build_number):
