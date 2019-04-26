@@ -260,7 +260,7 @@ class Build:
             raise JenkinsRequestError('Failed on getting build data')
 
     def get_build_file_parameter_content(self, parameter_name, filename):
-        if 'number' not in self.data:
+        if self.data is None:
             self.pull_build_data()
         url = '{}/parameters/parameter/{}/{}'.format(self.url, parameter_name, filename)
         response = requests.get(url=url, auth=self.auth)
